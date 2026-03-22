@@ -1,43 +1,58 @@
 # ============================================================
-# GLoW Minimal — Configuration
+# GLoW Crafter — Configuration
 # ============================================================
-# Tout est ici. Pas de magic numbers dans le code.
 
 seed: 42
 
 # --- Dimensions ---
-workspace_dim: 128          # Dimension de l'espace workspace partagé
+workspace_dim: 128
 latent_dims:
-  vision: 256               # Dim latente de l'encodeur vision
-  text: 256                 # Dim latente de l'encodeur texte
-  audio: 128                # Dim latente de l'encodeur audio
+  vision: 256
+  state: 128
 
-# --- Encodeurs/Décodeurs ---
+# --- Crafter ---
+crafter:
+  num_actions: 17
+  state_dim: 16       # vitals (4) + inventory (12)
+
+# --- Encodeurs/Decodeurs ---
 vision:
   input_channels: 3
-  input_size: 32            # Ex: CIFAR-like
-  hidden_dim: 128
+  input_size: 64
+  hidden_dim: 64
 
-text:
-  vocab_size: 10000
-  embed_dim: 128
-  max_seq_len: 64
-
-audio:
-  n_mels: 64
-  hidden_dim: 128
+state:
+  input_dim: 16
+  hidden_dim: 64
 
 # --- Projections ---
 projection:
-  hidden_dim: 256           # MLP intermédiaire pour proj domain → workspace
+  hidden_dim: 256
   num_layers: 2
   dropout: 0.1
 
 # --- Workspace ---
 workspace:
-  fusion: "attention"       # "mean" | "attention"
-  num_heads: 4              # Si fusion == attention
+  fusion: "attention"
+  num_heads: 4
   num_layers: 2
+
+# --- RSSM (World Model) ---
+rssm:
+  deter_dim: 256
+  stoch_dim: 64
+  hidden_dim: 256
+  action_dim: 32
+
+# --- Actor-Critic ---
+actor_critic:
+  hidden_dim: 256
+  imagination_horizon: 15
+  gamma: 0.997
+  lambda_: 0.95
+  actor_lr: 3.0e-5
+  critic_lr: 3.0e-5
+  entropy_weight: 3.0e-3
 
 # --- Losses ---
 losses:
@@ -48,38 +63,64 @@ losses:
     weight: 1.0
   cycle:
     weight: 0.5
-  reconstruction:           # Autoencoder loss par domaine
+  reconstruction:
     weight: 0.2
+  world_model:
+    kl_weight: 1.0
+    kl_balance: 0.8
+    free_nats: 1.0
+    workspace_recon_weight: 1.0
+    reward_weight: 1.0
+    continue_weight: 1.0
 
 # --- Training ---
 training:
-  # Phase 1: Pré-entraîner les autoencoders domaine par domaine
-  pretrain_epochs: 10
+  # Phase 0: Data collection
+  collect_episodes: 200
+  collect_seed: 0
+  data_dir: "data/crafter_episodes"
+
+  # Phase 1: Pre-entrainer les autoencoders
+  pretrain_epochs: 20
   pretrain_lr: 1.0e-3
 
-  # Phase 2: Entraîner l'alignement workspace
-  align_epochs: 50
+  # Phase 2: Alignement workspace
+  align_epochs: 100
   align_lr: 5.0e-4
 
+  # Phase 3: World model
+  wm_epochs: 75
+  wm_lr: 3.0e-4
+  wm_seq_len: 50
+  wm_batch_size: 32
+  wm_max_batches: 200
+
+  # Phase 4: Actor-critic
+  ac_epochs: 100
+  ac_batch_size: 32
+  ac_max_batches: 200
+
+  # Shared
   batch_size: 128
   weight_decay: 1.0e-5
   grad_clip: 1.0
 
-  # Quelles paires de domaines aligner (toutes les combos)
   domain_pairs:
-    - ["vision", "text"]
-    - ["vision", "audio"]
-    - ["text", "audio"]
+    - ["vision", "state"]
 
 # --- Data ---
 data:
-  dataset: "dummy"          # "dummy" pour tester, remplace par ton dataset
+  dataset: "crafter_transitions"
   num_workers: 4
   train_split: 0.8
+
+# --- Evaluation ---
+eval:
+  eval_episodes: 20
 
 # --- Logging ---
 logging:
   use_wandb: false
-  project: "glow-minimal"
+  project: "glow-crafter"
   log_every: 50
-  eval_every: 5             # Éval tous les N epochs
+  eval_every: 5

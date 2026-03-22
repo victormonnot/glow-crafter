@@ -1,0 +1,368 @@
+(venv) victorfixe@DESKTOP-TP9O8BR:~/code/glow/glow_myprojects/glow-crafter$ python main.py --skip-collect
+Device: cuda
+Episodes deja collectes: 200 dans data/crafter_episodes
+GW: 5,403,780 params
+RSSM: 930,722 params
+Actor: 153,361 params
+Critic: 149,249 params
+
+CrafterTransitionDataset: 33567 transitions from 200 episodes
+CrafterSequenceDataset: 23810 sequences of length 50
+
+============================================================
+PHASE 1 — Pretrain autoencoders
+============================================================
+  Epoch   1/20 — recon loss: 0.3991
+  Epoch   2/20 — recon loss: 0.0199
+  Epoch   3/20 — recon loss: 0.0100
+  Epoch   4/20 — recon loss: 0.0063
+  Epoch   5/20 — recon loss: 0.0047
+  Epoch   6/20 — recon loss: 0.0037
+  Epoch   7/20 — recon loss: 0.0030
+  Epoch   8/20 — recon loss: 0.0025
+  Epoch   9/20 — recon loss: 0.0021
+  Epoch  10/20 — recon loss: 0.0017
+  Epoch  11/20 — recon loss: 0.0014
+  Epoch  12/20 — recon loss: 0.0013
+  Epoch  13/20 — recon loss: 0.0010
+  Epoch  14/20 — recon loss: 0.0009
+  Epoch  15/20 — recon loss: 0.0009
+  Epoch  16/20 — recon loss: 0.0007
+  Epoch  17/20 — recon loss: 0.0007
+  Epoch  18/20 — recon loss: 0.0006
+  Epoch  19/20 — recon loss: 0.0006
+  Epoch  20/20 — recon loss: 0.0005
+  Checkpoint sauvegarde: checkpoints/phase1_gw_v2.pt
+
+============================================================
+PHASE 2 — Workspace alignment
+============================================================
+  Epoch   1/100 — total: 18.0616  contr: 12.0390  trans: 5.8287  cycle: 0.3878
+  Epoch   2/100 — total: 17.2079  contr: 11.3934  trans: 5.7334  cycle: 0.1623
+  Epoch   3/100 — total: 17.0986  contr: 11.3185  trans: 5.7232  cycle: 0.1137
+  Epoch   4/100 — total: 17.0392  contr: 11.2731  trans: 5.7182  cycle: 0.0958
+  Epoch   5/100 — total: 16.9917  contr: 11.2341  trans: 5.7156  cycle: 0.0840
+  Epoch   6/100 — total: 16.9733  contr: 11.2242  trans: 5.7109  cycle: 0.0764
+  Epoch   7/100 — total: 16.9432  contr: 11.1994  trans: 5.7082  cycle: 0.0712
+  Epoch   8/100 — total: 16.9361  contr: 11.1935  trans: 5.7084  cycle: 0.0683
+  Epoch   9/100 — total: 16.9175  contr: 11.1800  trans: 5.7051  cycle: 0.0647
+  Epoch  10/100 — total: 16.9012  contr: 11.1659  trans: 5.7036  cycle: 0.0634
+  Epoch  11/100 — total: 16.8927  contr: 11.1583  trans: 5.7030  cycle: 0.0629
+  Epoch  12/100 — total: 16.8895  contr: 11.1580  trans: 5.7005  cycle: 0.0621
+  Epoch  13/100 — total: 16.8704  contr: 11.1390  trans: 5.6998  cycle: 0.0632
+  Epoch  14/100 — total: 16.8524  contr: 11.1240  trans: 5.6968  cycle: 0.0633
+  Epoch  15/100 — total: 16.8478  contr: 11.1203  trans: 5.6957  cycle: 0.0637
+  Epoch  16/100 — total: 16.8417  contr: 11.1165  trans: 5.6928  cycle: 0.0647
+  Epoch  17/100 — total: 16.8312  contr: 11.1080  trans: 5.6906  cycle: 0.0653
+  Epoch  18/100 — total: 16.8162  contr: 11.0948  trans: 5.6886  cycle: 0.0657
+  Epoch  19/100 — total: 16.8141  contr: 11.0941  trans: 5.6865  cycle: 0.0669
+  Epoch  20/100 — total: 16.7980  contr: 11.0839  trans: 5.6804  cycle: 0.0674
+  Epoch  21/100 — total: 16.7817  contr: 11.0730  trans: 5.6748  cycle: 0.0677
+  Epoch  22/100 — total: 16.7759  contr: 11.0676  trans: 5.6735  cycle: 0.0696
+  Epoch  23/100 — total: 16.7682  contr: 11.0664  trans: 5.6657  cycle: 0.0723
+  Epoch  24/100 — total: 16.7491  contr: 11.0549  trans: 5.6567  cycle: 0.0751
+  Epoch  25/100 — total: 16.7289  contr: 11.0438  trans: 5.6472  cycle: 0.0758
+  Epoch  26/100 — total: 16.7025  contr: 11.0301  trans: 5.6332  cycle: 0.0783
+  Epoch  27/100 — total: 16.6771  contr: 11.0208  trans: 5.6169  cycle: 0.0789
+  Epoch  28/100 — total: 16.6233  contr: 10.9908  trans: 5.5922  cycle: 0.0805
+  Epoch  29/100 — total: 16.5864  contr: 10.9767  trans: 5.5690  cycle: 0.0815
+  Epoch  30/100 — total: 16.5231  contr: 10.9491  trans: 5.5335  cycle: 0.0810
+  Epoch  31/100 — total: 16.4471  contr: 10.9152  trans: 5.4917  cycle: 0.0804
+  Epoch  32/100 — total: 16.3501  contr: 10.8689  trans: 5.4414  cycle: 0.0796
+  Epoch  33/100 — total: 16.2406  contr: 10.8172  trans: 5.3840  cycle: 0.0788
+  Epoch  34/100 — total: 16.1368  contr: 10.7724  trans: 5.3258  cycle: 0.0772
+  Epoch  35/100 — total: 16.0202  contr: 10.7182  trans: 5.2638  cycle: 0.0766
+  Epoch  36/100 — total: 15.8913  contr: 10.6549  trans: 5.1986  cycle: 0.0756
+  Epoch  37/100 — total: 15.7800  contr: 10.6036  trans: 5.1392  cycle: 0.0744
+  Epoch  38/100 — total: 15.6668  contr: 10.5493  trans: 5.0807  cycle: 0.0736
+  Epoch  39/100 — total: 15.5358  contr: 10.4888  trans: 5.0106  cycle: 0.0727
+  Epoch  40/100 — total: 15.4275  contr: 10.4330  trans: 4.9586  cycle: 0.0719
+  Epoch  41/100 — total: 15.3282  contr: 10.3870  trans: 4.9056  cycle: 0.0710
+  Epoch  42/100 — total: 15.2272  contr: 10.3383  trans: 4.8536  cycle: 0.0705
+  Epoch  43/100 — total: 15.1325  contr: 10.2934  trans: 4.8042  cycle: 0.0699
+  Epoch  44/100 — total: 15.0280  contr: 10.2419  trans: 4.7514  cycle: 0.0694
+  Epoch  45/100 — total: 14.9325  contr: 10.1938  trans: 4.7044  cycle: 0.0686
+  Epoch  46/100 — total: 14.8690  contr: 10.1662  trans: 4.6686  cycle: 0.0685
+  Epoch  47/100 — total: 14.8011  contr: 10.1354  trans: 4.6319  cycle: 0.0677
+  Epoch  48/100 — total: 14.7172  contr: 10.0947  trans: 4.5890  cycle: 0.0671
+  Epoch  49/100 — total: 14.6579  contr: 10.0628  trans: 4.5619  cycle: 0.0666
+  Epoch  50/100 — total: 14.5811  contr: 10.0263  trans: 4.5216  cycle: 0.0664
+  Epoch  51/100 — total: 14.5177  contr: 9.9947  trans: 4.4900  cycle: 0.0660
+  Epoch  52/100 — total: 14.4655  contr: 9.9699  trans: 4.4628  cycle: 0.0655
+  Epoch  53/100 — total: 14.4048  contr: 9.9354  trans: 4.4369  cycle: 0.0651
+  Epoch  54/100 — total: 14.3492  contr: 9.9090  trans: 4.4079  cycle: 0.0646
+  Epoch  55/100 — total: 14.2964  contr: 9.8861  trans: 4.3780  cycle: 0.0646
+  Epoch  56/100 — total: 14.2556  contr: 9.8676  trans: 4.3559  cycle: 0.0642
+  Epoch  57/100 — total: 14.1965  contr: 9.8313  trans: 4.3332  cycle: 0.0639
+  Epoch  58/100 — total: 14.1586  contr: 9.8175  trans: 4.3092  cycle: 0.0637
+  Epoch  59/100 — total: 14.1052  contr: 9.7909  trans: 4.2825  cycle: 0.0635
+  Epoch  60/100 — total: 14.0604  contr: 9.7684  trans: 4.2603  cycle: 0.0633
+  Epoch  61/100 — total: 14.0145  contr: 9.7463  trans: 4.2367  cycle: 0.0630
+  Epoch  62/100 — total: 13.9804  contr: 9.7270  trans: 4.2221  cycle: 0.0626
+  Epoch  63/100 — total: 13.9441  contr: 9.7088  trans: 4.2041  cycle: 0.0624
+  Epoch  64/100 — total: 13.8984  contr: 9.6930  trans: 4.1744  cycle: 0.0620
+  Epoch  65/100 — total: 13.8712  contr: 9.6751  trans: 4.1652  cycle: 0.0618
+  Epoch  66/100 — total: 13.8400  contr: 9.6607  trans: 4.1485  cycle: 0.0615
+  Epoch  67/100 — total: 13.7935  contr: 9.6356  trans: 4.1272  cycle: 0.0615
+  Epoch  68/100 — total: 13.7674  contr: 9.6263  trans: 4.1104  cycle: 0.0613
+  Epoch  69/100 — total: 13.7308  contr: 9.6091  trans: 4.0911  cycle: 0.0610
+  Epoch  70/100 — total: 13.6857  contr: 9.5840  trans: 4.0715  cycle: 0.0605
+  Epoch  71/100 — total: 13.6616  contr: 9.5762  trans: 4.0551  cycle: 0.0607
+  Epoch  72/100 — total: 13.6336  contr: 9.5595  trans: 4.0439  cycle: 0.0603
+  Epoch  73/100 — total: 13.6116  contr: 9.5532  trans: 4.0284  cycle: 0.0601
+  Epoch  74/100 — total: 13.5817  contr: 9.5380  trans: 4.0137  cycle: 0.0599
+  Epoch  75/100 — total: 13.5678  contr: 9.5305  trans: 4.0074  cycle: 0.0598
+  Epoch  76/100 — total: 13.5214  contr: 9.5096  trans: 3.9820  cycle: 0.0596
+  Epoch  77/100 — total: 13.5018  contr: 9.4990  trans: 3.9731  cycle: 0.0594
+  Epoch  78/100 — total: 13.4820  contr: 9.4944  trans: 3.9580  cycle: 0.0592
+  Epoch  79/100 — total: 13.4408  contr: 9.4716  trans: 3.9396  cycle: 0.0592
+  Epoch  80/100 — total: 13.4254  contr: 9.4677  trans: 3.9281  cycle: 0.0591
+  Epoch  81/100 — total: 13.4160  contr: 9.4603  trans: 3.9262  cycle: 0.0590
+  Epoch  82/100 — total: 13.3922  contr: 9.4479  trans: 3.9149  cycle: 0.0589
+  Epoch  83/100 — total: 13.3662  contr: 9.4334  trans: 3.9034  cycle: 0.0588
+  Epoch  84/100 — total: 13.3445  contr: 9.4263  trans: 3.8888  cycle: 0.0587
+  Epoch  85/100 — total: 13.3275  contr: 9.4200  trans: 3.8783  cycle: 0.0584
+  Epoch  86/100 — total: 13.3307  contr: 9.4236  trans: 3.8779  cycle: 0.0584
+  Epoch  87/100 — total: 13.3082  contr: 9.4082  trans: 3.8708  cycle: 0.0584
+  Epoch  88/100 — total: 13.2803  contr: 9.3988  trans: 3.8523  cycle: 0.0583
+  Epoch  89/100 — total: 13.2753  contr: 9.3950  trans: 3.8511  cycle: 0.0584
+  Epoch  90/100 — total: 13.2698  contr: 9.3949  trans: 3.8458  cycle: 0.0582
+  Epoch  91/100 — total: 13.2523  contr: 9.3860  trans: 3.8370  cycle: 0.0584
+  Epoch  92/100 — total: 13.2448  contr: 9.3838  trans: 3.8319  cycle: 0.0582
+  Epoch  93/100 — total: 13.2238  contr: 9.3702  trans: 3.8246  cycle: 0.0580
+  Epoch  94/100 — total: 13.2288  contr: 9.3733  trans: 3.8265  cycle: 0.0581
+  Epoch  95/100 — total: 13.2180  contr: 9.3668  trans: 3.8222  cycle: 0.0581
+  Epoch  96/100 — total: 13.2125  contr: 9.3675  trans: 3.8159  cycle: 0.0582
+  Epoch  97/100 — total: 13.2044  contr: 9.3679  trans: 3.8074  cycle: 0.0582
+  Epoch  98/100 — total: 13.2086  contr: 9.3668  trans: 3.8127  cycle: 0.0582
+  Epoch  99/100 — total: 13.1982  contr: 9.3627  trans: 3.8064  cycle: 0.0581
+  Epoch 100/100 — total: 13.2003  contr: 9.3632  trans: 3.8081  cycle: 0.0580
+
+============================================================
+EVALUATION
+============================================================
+  retrieval_vision->state_R@1: 0.0576
+  retrieval_vision->state_R@5: 0.1905
+  retrieval_vision->state_R@10: 0.2676
+  translation_mse_vision->state: 0.005413
+  retrieval_vision->action_R@1: 0.0000
+  retrieval_vision->action_R@5: 0.0004
+  retrieval_vision->action_R@10: 0.0018
+  translation_acc_vision->action: 0.0547
+  retrieval_state->action_R@1: 0.0000
+  retrieval_state->action_R@5: 0.0009
+  retrieval_state->action_R@10: 0.0015
+  translation_acc_state->action: 0.0599
+
+  vision_mean_norm: 10.2975
+  vision_std: 0.9181
+  state_mean_norm: 13.2575
+  state_std: 1.1868
+  action_mean_norm: 22.5398
+  action_std: 1.9919
+  centroid_dist_vision_state: 4.9617
+  centroid_cos_vision_state: -0.1746
+  centroid_dist_vision_action: 6.6034
+  centroid_cos_vision_action: 0.4764
+  centroid_dist_state_action: 9.9108
+  centroid_cos_state_action: -0.4433
+  Checkpoint sauvegarde: checkpoints/phase2_gw_v1.pt
+
+============================================================
+PHASE 3 — World Model (RSSM)
+============================================================
+  Epoch   1/75 — total: 1.8561  kl: 1.1432  ws_recon: 0.6681  reward: 0.0160  cont: 0.0288
+  Epoch   2/75 — total: 1.8360  kl: 1.4069  ws_recon: 0.4120  reward: 0.0151  cont: 0.0019
+  Epoch   3/75 — total: 1.8558  kl: 1.5206  ws_recon: 0.3193  reward: 0.0140  cont: 0.0019
+  Epoch   4/75 — total: 1.8520  kl: 1.5601  ws_recon: 0.2769  reward: 0.0135  cont: 0.0015
+  Epoch   5/75 — total: 1.8350  kl: 1.5692  ws_recon: 0.2516  reward: 0.0122  cont: 0.0019
+  Epoch   6/75 — total: 1.8173  kl: 1.5738  ws_recon: 0.2307  reward: 0.0112  cont: 0.0016
+  Epoch   7/75 — total: 1.8014  kl: 1.5730  ws_recon: 0.2166  reward: 0.0103  cont: 0.0015
+  Epoch   8/75 — total: 1.7795  kl: 1.5646  ws_recon: 0.2038  reward: 0.0098  cont: 0.0013
+  Epoch   9/75 — total: 1.7511  kl: 1.5520  ws_recon: 0.1883  reward: 0.0094  cont: 0.0014
+  Epoch  10/75 — total: 1.7449  kl: 1.5542  ws_recon: 0.1805  reward: 0.0091  cont: 0.0011
+  Epoch  11/75 — total: 1.7126  kl: 1.5327  ws_recon: 0.1701  reward: 0.0085  cont: 0.0012
+  Epoch  12/75 — total: 1.6972  kl: 1.5255  ws_recon: 0.1622  reward: 0.0084  cont: 0.0011
+  Epoch  13/75 — total: 1.6725  kl: 1.5066  ws_recon: 0.1566  reward: 0.0081  cont: 0.0012
+  Epoch  14/75 — total: 1.6434  kl: 1.4845  ws_recon: 0.1505  reward: 0.0076  cont: 0.0009
+  Epoch  15/75 — total: 1.6314  kl: 1.4768  ws_recon: 0.1464  reward: 0.0073  cont: 0.0009
+  Epoch  16/75 — total: 1.5969  kl: 1.4464  ws_recon: 0.1427  reward: 0.0069  cont: 0.0009
+  Epoch  17/75 — total: 1.5698  kl: 1.4249  ws_recon: 0.1377  reward: 0.0064  cont: 0.0008
+  Epoch  18/75 — total: 1.5566  kl: 1.4142  ws_recon: 0.1356  reward: 0.0061  cont: 0.0008
+  Epoch  19/75 — total: 1.5333  kl: 1.3939  ws_recon: 0.1326  reward: 0.0057  cont: 0.0011
+  Epoch  20/75 — total: 1.5317  kl: 1.3947  ws_recon: 0.1304  reward: 0.0057  cont: 0.0009
+  Epoch  21/75 — total: 1.5167  kl: 1.3832  ws_recon: 0.1272  reward: 0.0053  cont: 0.0010
+  Epoch  22/75 — total: 1.4990  kl: 1.3681  ws_recon: 0.1250  reward: 0.0051  cont: 0.0009
+  Epoch  23/75 — total: 1.4908  kl: 1.3620  ws_recon: 0.1230  reward: 0.0048  cont: 0.0010
+  Epoch  24/75 — total: 1.4748  kl: 1.3487  ws_recon: 0.1205  reward: 0.0045  cont: 0.0010
+  Epoch  25/75 — total: 1.4643  kl: 1.3407  ws_recon: 0.1185  reward: 0.0043  cont: 0.0008
+  Epoch  26/75 — total: 1.4554  kl: 1.3334  ws_recon: 0.1169  reward: 0.0043  cont: 0.0008
+  Epoch  27/75 — total: 1.4543  kl: 1.3331  ws_recon: 0.1162  reward: 0.0040  cont: 0.0009
+  Epoch  28/75 — total: 1.4437  kl: 1.3250  ws_recon: 0.1139  reward: 0.0036  cont: 0.0011
+  Epoch  29/75 — total: 1.4437  kl: 1.3258  ws_recon: 0.1133  reward: 0.0037  cont: 0.0010
+  Epoch  30/75 — total: 1.4344  kl: 1.3185  ws_recon: 0.1114  reward: 0.0033  cont: 0.0010
+  Epoch  31/75 — total: 1.4240  kl: 1.3105  ws_recon: 0.1095  reward: 0.0033  cont: 0.0008
+  Epoch  32/75 — total: 1.4215  kl: 1.3080  ws_recon: 0.1095  reward: 0.0031  cont: 0.0009
+  Epoch  33/75 — total: 1.4060  kl: 1.2943  ws_recon: 0.1077  reward: 0.0030  cont: 0.0009
+  Epoch  34/75 — total: 1.4061  kl: 1.2955  ws_recon: 0.1067  reward: 0.0029  cont: 0.0009
+  Epoch  35/75 — total: 1.4004  kl: 1.2908  ws_recon: 0.1060  reward: 0.0027  cont: 0.0009
+  Epoch  36/75 — total: 1.3933  kl: 1.2853  ws_recon: 0.1045  reward: 0.0027  cont: 0.0009
+  Epoch  37/75 — total: 1.3966  kl: 1.2883  ws_recon: 0.1047  reward: 0.0027  cont: 0.0009
+  Epoch  38/75 — total: 1.3889  kl: 1.2815  ws_recon: 0.1038  reward: 0.0026  cont: 0.0010
+  Epoch  39/75 — total: 1.3785  kl: 1.2733  ws_recon: 0.1019  reward: 0.0024  cont: 0.0009
+  Epoch  40/75 — total: 1.3748  kl: 1.2699  ws_recon: 0.1016  reward: 0.0023  cont: 0.0009
+  Epoch  41/75 — total: 1.3690  kl: 1.2653  ws_recon: 0.1005  reward: 0.0023  cont: 0.0009
+  Epoch  42/75 — total: 1.3673  kl: 1.2645  ws_recon: 0.0997  reward: 0.0022  cont: 0.0010
+  Epoch  43/75 — total: 1.3683  kl: 1.2660  ws_recon: 0.0993  reward: 0.0021  cont: 0.0009
+  Epoch  44/75 — total: 1.3591  kl: 1.2576  ws_recon: 0.0985  reward: 0.0021  cont: 0.0009
+  Epoch  45/75 — total: 1.3533  kl: 1.2530  ws_recon: 0.0975  reward: 0.0021  cont: 0.0008
+  Epoch  46/75 — total: 1.3570  kl: 1.2568  ws_recon: 0.0974  reward: 0.0020  cont: 0.0009
+  Epoch  47/75 — total: 1.3491  kl: 1.2498  ws_recon: 0.0967  reward: 0.0019  cont: 0.0008
+  Epoch  48/75 — total: 1.3505  kl: 1.2510  ws_recon: 0.0967  reward: 0.0019  cont: 0.0010
+  Epoch  49/75 — total: 1.3450  kl: 1.2468  ws_recon: 0.0956  reward: 0.0018  cont: 0.0008
+  Epoch  50/75 — total: 1.3403  kl: 1.2426  ws_recon: 0.0950  reward: 0.0019  cont: 0.0008
+  Epoch  51/75 — total: 1.3400  kl: 1.2425  ws_recon: 0.0948  reward: 0.0018  cont: 0.0009
+  Epoch  52/75 — total: 1.3337  kl: 1.2373  ws_recon: 0.0938  reward: 0.0018  cont: 0.0008
+  Epoch  53/75 — total: 1.3359  kl: 1.2399  ws_recon: 0.0935  reward: 0.0017  cont: 0.0009
+  Epoch  54/75 — total: 1.3308  kl: 1.2351  ws_recon: 0.0933  reward: 0.0017  cont: 0.0007
+  Epoch  55/75 — total: 1.3303  kl: 1.2345  ws_recon: 0.0935  reward: 0.0016  cont: 0.0007
+  Epoch  56/75 — total: 1.3277  kl: 1.2328  ws_recon: 0.0926  reward: 0.0016  cont: 0.0007
+  Epoch  57/75 — total: 1.3234  kl: 1.2290  ws_recon: 0.0920  reward: 0.0016  cont: 0.0008
+  Epoch  58/75 — total: 1.3266  kl: 1.2328  ws_recon: 0.0914  reward: 0.0016  cont: 0.0009
+  Epoch  59/75 — total: 1.3170  kl: 1.2238  ws_recon: 0.0908  reward: 0.0015  cont: 0.0008
+  Epoch  60/75 — total: 1.3265  kl: 1.2330  ws_recon: 0.0913  reward: 0.0014  cont: 0.0008
+  Epoch  61/75 — total: 1.3144  kl: 1.2218  ws_recon: 0.0905  reward: 0.0014  cont: 0.0006
+  Epoch  62/75 — total: 1.3133  kl: 1.2218  ws_recon: 0.0895  reward: 0.0014  cont: 0.0007
+  Epoch  63/75 — total: 1.3198  kl: 1.2272  ws_recon: 0.0905  reward: 0.0014  cont: 0.0008
+  Epoch  64/75 — total: 1.3147  kl: 1.2231  ws_recon: 0.0895  reward: 0.0014  cont: 0.0007
+  Epoch  65/75 — total: 1.3159  kl: 1.2245  ws_recon: 0.0892  reward: 0.0014  cont: 0.0008
+  Epoch  66/75 — total: 1.3084  kl: 1.2184  ws_recon: 0.0880  reward: 0.0013  cont: 0.0007
+  Epoch  67/75 — total: 1.3065  kl: 1.2164  ws_recon: 0.0879  reward: 0.0013  cont: 0.0009
+  Epoch  68/75 — total: 1.3076  kl: 1.2170  ws_recon: 0.0885  reward: 0.0013  cont: 0.0008
+  Epoch  69/75 — total: 1.3036  kl: 1.2142  ws_recon: 0.0874  reward: 0.0013  cont: 0.0007
+  Epoch  70/75 — total: 1.3013  kl: 1.2121  ws_recon: 0.0874  reward: 0.0012  cont: 0.0006
+  Epoch  71/75 — total: 1.3019  kl: 1.2131  ws_recon: 0.0868  reward: 0.0013  cont: 0.0008
+  Epoch  72/75 — total: 1.3048  kl: 1.2156  ws_recon: 0.0872  reward: 0.0012  cont: 0.0008
+  Epoch  73/75 — total: 1.2965  kl: 1.2085  ws_recon: 0.0862  reward: 0.0011  cont: 0.0007
+  Epoch  74/75 — total: 1.3000  kl: 1.2117  ws_recon: 0.0863  reward: 0.0012  cont: 0.0008
+  Epoch  75/75 — total: 1.2941  kl: 1.2058  ws_recon: 0.0862  reward: 0.0012  cont: 0.0009
+  Checkpoint sauvegarde: checkpoints/phase3_rssm_v1.pt
+
+============================================================
+PHASE 4 — Actor-Critic (imagination)
+============================================================
+  Epoch   1/100 — actor: 3.9278  critic: 0.0765  entropy: 2.7271  imag_reward: 0.0117
+  Epoch   2/100 — actor: 3.4631  critic: 0.1134  entropy: 2.4538  imag_reward: 0.0125
+  Epoch   3/100 — actor: 2.1486  critic: 0.2110  entropy: 1.8794  imag_reward: 0.0132
+  Epoch   4/100 — actor: 1.2969  critic: 0.2490  entropy: 1.3244  imag_reward: 0.0127
+  Epoch   5/100 — actor: 0.6809  critic: 0.2217  entropy: 0.8696  imag_reward: 0.0106
+  Epoch   6/100 — actor: 0.3037  critic: 0.2111  entropy: 0.5652  imag_reward: 0.0093
+  Epoch   7/100 — actor: 0.1000  critic: 0.2609  entropy: 0.4043  imag_reward: 0.0095
+  Epoch   8/100 — actor: 0.0721  critic: 0.2616  entropy: 0.3212  imag_reward: 0.0091
+  Epoch   9/100 — actor: 0.0651  critic: 0.2800  entropy: 0.2566  imag_reward: 0.0091
+  Epoch  10/100 — actor: 0.0441  critic: 0.2910  entropy: 0.2070  imag_reward: 0.0093
+  Epoch  11/100 — actor: 0.0282  critic: 0.2999  entropy: 0.1795  imag_reward: 0.0088
+  Epoch  12/100 — actor: 0.0225  critic: 0.3212  entropy: 0.1622  imag_reward: 0.0090
+  Epoch  13/100 — actor: 0.0194  critic: 0.3383  entropy: 0.1451  imag_reward: 0.0083
+  Epoch  14/100 — actor: 0.0139  critic: 0.3419  entropy: 0.1319  imag_reward: 0.0088
+  Epoch  15/100 — actor: 0.0066  critic: 0.3081  entropy: 0.1294  imag_reward: 0.0072
+  Epoch  16/100 — actor: 0.0078  critic: 0.2975  entropy: 0.1263  imag_reward: 0.0090
+  Epoch  17/100 — actor: 0.0105  critic: 0.3294  entropy: 0.1163  imag_reward: 0.0083
+  Epoch  18/100 — actor: 0.0074  critic: 0.3205  entropy: 0.1086  imag_reward: 0.0089
+  Epoch  19/100 — actor: 0.0028  critic: 0.2206  entropy: 0.1106  imag_reward: 0.0079
+  Epoch  20/100 — actor: 0.0050  critic: 0.2484  entropy: 0.1267  imag_reward: 0.0090
+  Epoch  21/100 — actor: 0.0097  critic: 0.3508  entropy: 0.0985  imag_reward: 0.0088
+  Epoch  22/100 — actor: 0.0050  critic: 0.3044  entropy: 0.0956  imag_reward: 0.0083
+  Epoch  23/100 — actor: 0.0078  critic: 0.2918  entropy: 0.0906  imag_reward: 0.0091
+  Epoch  24/100 — actor: 0.0059  critic: 0.2603  entropy: 0.0826  imag_reward: 0.0085
+  Epoch  25/100 — actor: 0.0075  critic: 0.3316  entropy: 0.0754  imag_reward: 0.0085
+  Epoch  26/100 — actor: 0.0063  critic: 0.2386  entropy: 0.0669  imag_reward: 0.0090
+  Epoch  27/100 — actor: 0.0056  critic: 0.2224  entropy: 0.0577  imag_reward: 0.0087
+  Epoch  28/100 — actor: 0.0056  critic: 0.2220  entropy: 0.0484  imag_reward: 0.0080
+  Epoch  29/100 — actor: 0.0041  critic: 0.2225  entropy: 0.0451  imag_reward: 0.0084
+  Epoch  30/100 — actor: 0.0044  critic: 0.2443  entropy: 0.0410  imag_reward: 0.0088
+  Epoch  31/100 — actor: 0.0030  critic: 0.2142  entropy: 0.0369  imag_reward: 0.0089
+  Epoch  32/100 — actor: 0.0023  critic: 0.2101  entropy: 0.0367  imag_reward: 0.0077
+  Epoch  33/100 — actor: 0.0024  critic: 0.1971  entropy: 0.0385  imag_reward: 0.0081
+  Epoch  34/100 — actor: 0.0025  critic: 0.2114  entropy: 0.0373  imag_reward: 0.0086
+  Epoch  35/100 — actor: 0.0026  critic: 0.2296  entropy: 0.0324  imag_reward: 0.0089
+  Epoch  36/100 — actor: 0.0044  critic: 0.1452  entropy: 0.0292  imag_reward: 0.0090
+  Epoch  37/100 — actor: 0.0025  critic: 0.1778  entropy: 0.0293  imag_reward: 0.0083
+  Epoch  38/100 — actor: 0.0019  critic: 0.1800  entropy: 0.0259  imag_reward: 0.0083
+  Epoch  39/100 — actor: 0.0024  critic: 0.1643  entropy: 0.0258  imag_reward: 0.0080
+  Epoch  40/100 — actor: 0.0036  critic: 0.1678  entropy: 0.0203  imag_reward: 0.0076
+  Epoch  41/100 — actor: 0.0028  critic: 0.2039  entropy: 0.0183  imag_reward: 0.0083
+  Epoch  42/100 — actor: 0.0010  critic: 0.2007  entropy: 0.0189  imag_reward: 0.0079
+  Epoch  43/100 — actor: 0.0026  critic: 0.2458  entropy: 0.0210  imag_reward: 0.0081
+  Epoch  44/100 — actor: 0.0013  critic: 0.2956  entropy: 0.0235  imag_reward: 0.0084
+  Epoch  45/100 — actor: -0.0024  critic: 0.3573  entropy: 0.0259  imag_reward: 0.0077
+  Epoch  46/100 — actor: -0.0045  critic: 0.3000  entropy: 0.0051  imag_reward: 0.0057
+  Epoch  47/100 — actor: 0.0013  critic: 3.1085  entropy: 0.0147  imag_reward: 0.0096
+  Epoch  48/100 — actor: 0.0087  critic: 1.4611  entropy: 0.0334  imag_reward: 0.0094
+  Epoch  49/100 — actor: -0.0041  critic: 0.2536  entropy: 0.0079  imag_reward: 0.0060
+  Epoch  50/100 — actor: -0.0011  critic: 1.8443  entropy: 0.0086  imag_reward: 0.0063
+  Epoch  51/100 — actor: 0.0031  critic: 1.1471  entropy: 0.0085  imag_reward: 0.0058
+  Epoch  52/100 — actor: 0.0095  critic: 1.1425  entropy: 0.0248  imag_reward: 0.0091
+  Epoch  53/100 — actor: 0.0078  critic: 0.2526  entropy: 0.0192  imag_reward: 0.0077
+  Epoch  54/100 — actor: 0.0040  critic: 0.1772  entropy: 0.0108  imag_reward: 0.0085
+  Epoch  55/100 — actor: 0.0026  critic: 0.1386  entropy: 0.0084  imag_reward: 0.0081
+  Epoch  56/100 — actor: 0.0018  critic: 0.1696  entropy: 0.0072  imag_reward: 0.0078
+  Epoch  57/100 — actor: 0.0016  critic: 0.1667  entropy: 0.0062  imag_reward: 0.0078
+  Epoch  58/100 — actor: 0.0014  critic: 0.2227  entropy: 0.0056  imag_reward: 0.0080
+  Epoch  59/100 — actor: 0.0009  critic: 0.2529  entropy: 0.0059  imag_reward: 0.0085
+  Epoch  60/100 — actor: 0.0010  critic: 0.3393  entropy: 0.0059  imag_reward: 0.0077
+  Epoch  61/100 — actor: 0.0012  critic: 0.3929  entropy: 0.0056  imag_reward: 0.0088
+  Epoch  62/100 — actor: 0.0009  critic: 0.3030  entropy: 0.0062  imag_reward: 0.0082
+  Epoch  63/100 — actor: 0.0009  critic: 0.3064  entropy: 0.0052  imag_reward: 0.0083
+  Epoch  64/100 — actor: 0.0005  critic: 0.3327  entropy: 0.0056  imag_reward: 0.0082
+  Epoch  65/100 — actor: 0.0007  critic: 0.3258  entropy: 0.0070  imag_reward: 0.0087
+  Epoch  66/100 — actor: 0.0006  critic: 0.3740  entropy: 0.0093  imag_reward: 0.0084
+  Epoch  67/100 — actor: 0.0007  critic: 0.3786  entropy: 0.0080  imag_reward: 0.0083
+  Epoch  68/100 — actor: 0.0004  critic: 0.4025  entropy: 0.0098  imag_reward: 0.0076
+  Epoch  69/100 — actor: 0.0010  critic: 0.3991  entropy: 0.0126  imag_reward: 0.0084
+  Epoch  70/100 — actor: 0.0009  critic: 0.4795  entropy: 0.0135  imag_reward: 0.0080
+  Epoch  71/100 — actor: -0.0001  critic: 0.5317  entropy: 0.0122  imag_reward: 0.0090
+  Epoch  72/100 — actor: 0.0007  critic: 0.4357  entropy: 0.0095  imag_reward: 0.0083
+  Epoch  73/100 — actor: 0.0001  critic: 0.4754  entropy: 0.0101  imag_reward: 0.0080
+  Epoch  74/100 — actor: 0.0003  critic: 0.4452  entropy: 0.0072  imag_reward: 0.0089
+  Epoch  75/100 — actor: 0.0001  critic: 0.3491  entropy: 0.0061  imag_reward: 0.0085
+  Epoch  76/100 — actor: 0.0019  critic: 0.5183  entropy: 0.0160  imag_reward: 0.0087
+  Epoch  77/100 — actor: 0.0021  critic: 0.4367  entropy: 0.0161  imag_reward: 0.0084
+  Epoch  78/100 — actor: 0.0011  critic: 0.3203  entropy: 0.0178  imag_reward: 0.0077
+  Epoch  79/100 — actor: 0.0018  critic: 0.3456  entropy: 0.0194  imag_reward: 0.0074
+  Epoch  80/100 — actor: 0.0013  critic: 0.3073  entropy: 0.0144  imag_reward: 0.0081
+  Epoch  81/100 — actor: 0.0008  critic: 0.2788  entropy: 0.0126  imag_reward: 0.0089
+  Epoch  82/100 — actor: 0.0002  critic: 0.3515  entropy: 0.0146  imag_reward: 0.0080
+  Epoch  83/100 — actor: 0.0004  critic: 0.2888  entropy: 0.0142  imag_reward: 0.0082
+  Epoch  84/100 — actor: -0.0004  critic: 0.2982  entropy: 0.0218  imag_reward: 0.0076
+  Epoch  85/100 — actor: 0.0009  critic: 0.3082  entropy: 0.0195  imag_reward: 0.0083
+  Epoch  86/100 — actor: 0.0006  critic: 0.3837  entropy: 0.0209  imag_reward: 0.0080
+  Epoch  87/100 — actor: -0.0014  critic: 0.3270  entropy: 0.0144  imag_reward: 0.0068
+  Epoch  88/100 — actor: 0.0020  critic: 0.3842  entropy: 0.0122  imag_reward: 0.0065
+  Epoch  89/100 — actor: -0.0004  critic: 0.2807  entropy: 0.0140  imag_reward: 0.0077
+  Epoch  90/100 — actor: -0.0010  critic: 0.2820  entropy: 0.0115  imag_reward: 0.0072
+  Epoch  91/100 — actor: 0.0047  critic: 0.4282  entropy: 0.0199  imag_reward: 0.0078
+  Epoch  92/100 — actor: -0.0021  critic: 0.1753  entropy: 0.0085  imag_reward: 0.0069
+  Epoch  93/100 — actor: -0.0004  critic: 0.1254  entropy: 0.0047  imag_reward: 0.0062
+  Epoch  94/100 — actor: 0.0016  critic: 0.1878  entropy: 0.0103  imag_reward: 0.0075
+  Epoch  95/100 — actor: -0.0002  critic: 0.1988  entropy: 0.0101  imag_reward: 0.0072
+  Epoch  96/100 — actor: 0.0000  critic: 0.2375  entropy: 0.0071  imag_reward: 0.0067
+  Epoch  97/100 — actor: 0.0000  critic: 0.1542  entropy: 0.0096  imag_reward: 0.0070
+  Epoch  98/100 — actor: 0.0054  critic: 0.2478  entropy: 0.0200  imag_reward: 0.0070
+  Epoch  99/100 — actor: 0.0008  critic: 0.1498  entropy: 0.0185  imag_reward: 0.0085
+  Epoch 100/100 — actor: 0.0011  critic: 0.2710  entropy: 0.0226  imag_reward: 0.0083
+
+============================================================
+CRAFTER AGENT EVALUATION
+============================================================
+  Mean reward:  -0.75 +/- 0.48
+  Max reward:   1.10
+  Mean length:  180
+  Achievements: 2 unique types
+    collect_sapling: 2/20 episodes
+    eat_cow: 1/20 episodes
+  Checkpoint sauvegarde: checkpoints/phase4_agent_v1.pt
+
+Done.
+(venv) victorfixe@DESKTOP-TP9O8BR:~/code/glow/glow_myprojects/glow-crafter$ tmux capture-pane -pS - > training_log.txt
+

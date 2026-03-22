@@ -101,6 +101,10 @@ class GlobalWorkspace(nn.Module):
             # Mean pool sur les domaines après attention
             return fused.mean(dim=1)  # (B, D)
 
+    def encode_to_fused(self, inputs: Dict[str, torch.Tensor]) -> torch.Tensor:
+        """Raccourci : encode + fuse en un seul appel. Utile pour le RSSM."""
+        return self.fuse(self.encode_domains(inputs))
+
     def translate(
         self,
         source_name: str,
