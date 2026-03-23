@@ -10,10 +10,9 @@ Inspired by [Multimodal Dreaming](https://arxiv.org/pdf/2502.21142) (ruflab, ANI
 Crafter Env
     │
     ├── Vision (64x64 RGB)  ──► VisionEncoder ──► latent ──► projection ──┐
-    ├── State (16 scalars)  ──► StateEncoder  ──► latent ──► projection ──┤──► Global Workspace (fused)
-    └── Action (17 discrete) ─► ActionEncoder ──► latent ──► projection ──┘         │
-                                                                                     ▼
-                                                                              RSSM World Model
+    └── State (16 scalars)  ──► StateEncoder  ──► latent ──► projection ──┴──► Global Workspace (fused)
+                                                                                     │
+                                                                    action ──► RSSM World Model
                                                                               (h=deterministic, z=stochastic)
                                                                                      │
                                                                               ┌──────┴──────┐
@@ -53,6 +52,21 @@ python main.py --phase 2 3 4       # Phases 2, 3, and 4
 # Use a different config file
 python main.py --config config/my_config.yaml
 ```
+
+### Data Collection
+
+```bash
+# Collect additional random episodes (appended to existing data)
+python main.py --collect-random 600
+
+# Collect episodes with the trained agent (loads phase 4 checkpoint)
+python main.py --collect-agent 200
+
+# View dataset composition (source, counts, dates, rewards)
+python main.py --show-data
+```
+
+Each collection is logged in `data/crafter_episodes/manifest.json` — tracks the source (random, agent_v4, ...), episode ranges, dates, and mean reward.
 
 ### Evaluation
 

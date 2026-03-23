@@ -1,0 +1,22 @@
+{
+  "collections": [
+    {
+      "source": "random",
+      "episodes": "0200-0799",
+      "count": 600,
+      "date": "2026-03-23T13:08:27"
+    },
+    {
+      "source": "agent_v4",
+      "episodes": "0800-0999",
+      "count": 200,
+      "date": "2026-03-23T13:16:15",
+      "mean_reward": 1.97
+    }
+  ],
+  "summary": {
+    "random": 600,
+    "agent_v4": 200
+  },
+  "total": 800
+}

@@ -27,7 +27,7 @@ import torch
 import yaml
 from torch.utils.data import DataLoader, random_split
 
-from data.collector import CrafterCollector
+from data.collector import CrafterCollector, AgentCollector
 from data.dataset import CrafterTransitionDataset, CrafterSequenceDataset
 from models.actor_critic import Actor, Critic
 from models.decoders import StateDecoder, VisionDecoder
@@ -241,16 +241,98 @@ def main():
                         help="Liste tous les checkpoints avec metriques")
     parser.add_argument("--load-version", type=str, default=None,
                         help="Version specifique a charger (ex: phase2_gw_v1)")
+    parser.add_argument("--collect-random", type=int, default=None,
+                        help="Collecter N episodes random supplementaires")
+    parser.add_argument("--collect-agent", type=int, default=None,
+                        help="Collecter N episodes avec l'agent entraine")
+    parser.add_argument("--show-data", action="store_true",
+                        help="Affiche le manifest des donnees collectees")
     args = parser.parse_args()
 
     if args.list_checkpoints:
         list_checkpoints()
         return
 
+    if args.show_data:
+        import json
+        data_dir = "data/crafter_episodes"
+        manifest_path = os.path.join(data_dir, "manifest.json")
+        if os.path.exists(manifest_path):
+            with open(manifest_path) as f:
+                manifest = json.load(f)
+            print(f"\nDataset: {manifest.get('total', '?')} episodes total")
+            print(f"Summary: {manifest.get('summary', {})}")
+            print(f"\nCollections:")
+            for c in manifest["collections"]:
+                reward_str = f"  mean_reward={c['mean_reward']}" if "mean_reward" in c else ""
+                print(f"  {c['source']:<12} episodes {c['episodes']}  ({c['count']:>4} eps)  {c['date']}{reward_str}")
+        else:
+            if os.path.exists(data_dir):
+                n = len([f for f in os.listdir(data_dir) if f.endswith(".npz")])
+                print(f"\n{n} episodes (pas de manifest — collectees avant le tracking)")
+            else:
+                print("\nPas de donnees.")
+        return
+
     config = load_config(args.config)
     torch.manual_seed(config["seed"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
+
+    # --- Collection-only modes ---
+    tc = config["training"]
+    data_dir = tc["data_dir"]
+
+    if args.collect_random is not None:
+        from data.collector import _next_episode_index
+        start_seed = _next_episode_index(data_dir)
+        print("=" * 60)
+        print(f"Collecte de {args.collect_random} episodes random supplementaires")
+        print("=" * 60)
+        collector = CrafterCollector(
+            save_dir=data_dir,
+            num_episodes=args.collect_random,
+            seed=start_seed,
+        )
+        collector.collect()
+        if args.collect_agent is None and args.phase is None and not args.eval:
+            n_eps = len([f for f in os.listdir(data_dir) if f.endswith(".npz")])
+            print(f"\nTotal episodes: {n_eps}")
+            return
+
+    if args.collect_agent is not None:
+        print("=" * 60)
+        print(f"Collecte de {args.collect_agent} episodes avec l'agent entraine")
+        print("=" * 60)
+        workspace = build_workspace(config).to(device)
+        rssm = build_rssm(config).to(device)
+        actor, _ = build_actor_critic(config, rssm)
+        actor = actor.to(device)
+
+        _load_gw(workspace, device, version=args.load_version)
+        try:
+            ckpt = load_checkpoint("phase3_rssm", device, version=args.load_version)
+            rssm.load_state_dict(ckpt["rssm_state_dict"])
+        except FileNotFoundError:
+            print("ERREUR: Pas de checkpoint RSSM (phase 3). Impossible de collecter avec l'agent.")
+            return
+        try:
+            ckpt = load_checkpoint("phase4_agent", device, version=args.load_version)
+            actor.load_state_dict(ckpt["actor_state_dict"])
+        except FileNotFoundError:
+            print("ERREUR: Pas de checkpoint agent (phase 4). Impossible de collecter avec l'agent.")
+            return
+
+        agent_collector = AgentCollector(
+            save_dir=data_dir,
+            num_episodes=args.collect_agent,
+        )
+        agent_collector.collect(workspace, rssm, actor, device)
+
+        if args.phase is None and not args.eval:
+            n_eps = len([f for f in os.listdir(data_dir) if f.endswith(".npz")])
+            print(f"\nTotal episodes: {n_eps}")
+            return
 
     # Quelles phases executer
     if args.eval:
@@ -260,10 +342,7 @@ def main():
     else:
         phases = [1, 2, 3, 4]
 
-    # --- Phase 0 : Data collection ---
-    tc = config["training"]
-    data_dir = tc["data_dir"]
-
+    # --- Phase 0 : Data collection (initial, si pas encore fait) ---
     if not args.skip_collect and not os.path.exists(data_dir) and not args.eval:
         print("=" * 60)
         print("PHASE 0 — Collecte d'episodes Crafter")
