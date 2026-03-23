@@ -10,6 +10,8 @@ Chaque phase sauvegarde un checkpoint independant.
 On peut relancer depuis n'importe quelle phase avec --phase N.
 """
 
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -216,7 +218,8 @@ def actor_critic_epoch(
     lambda_: float = 0.95,
     log_alpha: torch.Tensor = None,
     alpha_optimizer: torch.optim.Optimizer = None,
-    target_entropy: float = 1.4,
+    target_entropy: float = 1.0,
+    alpha_min: float = 0.01,
     actor_grad_clip: float = 100.0,
     critic_grad_clip: float = 100.0,
     max_batches: Optional[int] = None,
@@ -301,6 +304,9 @@ def actor_critic_epoch(
             alpha_loss = log_alpha.exp() * (entropy.detach() - target_entropy)
             alpha_loss.backward()
             alpha_optimizer.step()
+            # Clamp alpha to prevent it from dying
+            with torch.no_grad():
+                log_alpha.clamp_(min=math.log(alpha_min))
 
         metrics["actor_loss"] += actor_loss.item()
         metrics["critic_loss"] += critic_loss.item()
@@ -479,6 +485,7 @@ def train_phase4(workspace, rssm, actor, critic, seq_loader, config, device):
             log_alpha=log_alpha,
             alpha_optimizer=alpha_optimizer,
             target_entropy=target_entropy,
+            alpha_min=ac_cfg.get("alpha_min", 0.01),
             actor_grad_clip=ac_cfg.get("actor_grad_clip", 100.0),
             critic_grad_clip=ac_cfg.get("critic_grad_clip", 100.0),
             max_batches=max_batches,

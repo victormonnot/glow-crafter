@@ -53,8 +53,9 @@ actor_critic:
   actor_lr: 1.0e-5
   critic_lr: 1.0e-5
   entropy_weight: 1.0e-2
-  target_entropy: 1.4
+  target_entropy: 1.0
   entropy_lr: 1.0e-3
+  alpha_min: 0.01
   actor_grad_clip: 100.0
   critic_grad_clip: 100.0
 

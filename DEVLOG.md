@@ -192,10 +192,46 @@ Ce fichier trace toutes les etapes majeures du projet, les problemes rencontres,
 
 ---
 
+## Run 5 — Premiere boucle complete (1000 episodes : 800 random + 200 agent)
+
+**Contexte** : Premiere iteration de la boucle collect -> train. 200 episodes existants + 600 random + 200 de l'agent v4.
+
+**Resultats Phase 1** : recon_loss=0.0002 (tres bien, mieux qu'avant)
+**Resultats Phase 2** :
+- Contrastive loss : 1.14 (vs 1.20 avant) — mieux
+- Translation MSE : 0.003 (vs 0.18 avant) — 60x mieux !
+- R@1 vision->state : 3.5% — semble plus bas que le 6.6% d'avant MAIS le set d'eval est 5x plus grand (40K vs 8K samples), donc c'est en realite comparable ou mieux
+**Resultats Phase 3** : ws_recon=0.050, KL=1.32 — convergence propre, comparable a avant
+**Resultats Phase 4** :
+- **Mean reward : 0.75** — en baisse vs 1.50 (run 4)
+- **3 achievements** vs 7 avant
+- Best epoch 55, entropy finale 0.84, alpha 0.002
+- Le probleme : alpha est tombe trop bas (0.002), arretant de pousser l'exploration. L'entropy a collapse sans filet.
+
+**Analyse** : Le GW et le world model sont meilleurs (translation MSE 60x plus bas), mais l'actor-critic a regresse. Le probleme est dans le controle de la policy, pas dans les representations. Alpha mourant = plus de regularisation entropy = policy qui s'effondre sur quelques actions.
+
+**Checkpoint** : `phase4_agent_v5.pt`
+
+---
+
+## Changement — Fix controle de la policy (target_entropy + alpha clamp)
+
+**Probleme** : Alpha tombe a 0.002 et meurt. L'entropy collapse suit inevitablement.
+**Solutions** :
+
+1. **Target entropy 1.4 -> 1.0** : 1.4 etait trop haut (max entropy pour 17 actions = ln(17) = 2.83). Ca forcait l'agent a rester trop uniforme au debut, puis alpha s'effondrait quand c'etait plus tenable. 1.0 est un compromis : assez d'exploration sans forcer la policy a etre random.
+
+2. **Alpha clamp min=0.01** : Empeche alpha de descendre sous 0.01. Garantit un minimum permanent de regularisation entropy. Meme si l'optimizer veut le baisser plus, le clamp le retient.
+
+**Fichiers modifies** : config.yaml (target_entropy, alpha_min), pipeline/train.py (alpha_min param + clamp apres optimizer step)
+
+**Espoir** : Alpha reste au-dessus de 0.01, entropy ne collapse plus completement, l'agent garde un minimum d'exploration sur les 100 epochs.
+
+---
+
 ## Prochaines etapes (a venir)
 
-- [ ] Collecter 600 episodes random + 200 episodes agent
-- [ ] Retrain complet (Phases 1-4) sur 1000 episodes
-- [ ] Evaluer si le R@1 monte avec plus de data
-- [ ] Si non : ameliorer Phase 2 (temperature contrastive, reconstruction loss pendant alignement, projection plus profondes)
-- [ ] Boucle : agent collecte -> retrain -> meilleur agent -> collecte -> ...
+- [ ] Retrain Phase 4 avec les nouveaux hyperparams (target_entropy=1.0, alpha_min=0.01)
+- [ ] Si mieux : replay GIF seed 42 pour comparer visuellement avec v4
+- [ ] Si le GW semble etre le bottleneck : ameliorer Phase 2 (temperature, reconstruction loss, projections)
+- [ ] Prochaine boucle collect -> train avec le meilleur agent
