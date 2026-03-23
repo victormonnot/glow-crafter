@@ -68,6 +68,24 @@ python main.py --show-data
 
 Each collection is logged in `data/crafter_episodes/manifest.json` — tracks the source (random, agent_v4, ...), episode ranges, dates, and mean reward.
 
+### Replay (watch the agent play)
+
+```bash
+# Save a GIF of the agent playing (seed random)
+python main.py --play
+
+# Reproducible replay (same seed = same world)
+python main.py --play --seed 42
+
+# Multiple seeds at once
+python main.py --play --seed 42 100 7
+
+# With a specific checkpoint version
+python main.py --play --seed 42 --load-version phase4_agent_v2
+```
+
+GIFs are saved in `replays/` with the naming convention `phase4_v{N}_seed{S}.gif`. Use the same seed across different training runs to compare agent behavior on the same world.
+
 ### Evaluation
 
 ```bash

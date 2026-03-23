@@ -178,6 +178,20 @@ Ce fichier trace toutes les etapes majeures du projet, les problemes rencontres,
 
 ---
 
+## Ajout — Replay GIF (--play)
+
+**Motivation** : On ne voyait que des chiffres et des images statiques dans le notebook. Pas de vrai gameplay visible.
+**Solution** :
+- `python main.py --play` : charge les checkpoints, joue un episode, sauvegarde un GIF (256x256, upscale depuis 64x64)
+- `--seed 42` pour des replays reproductibles (meme seed = meme monde)
+- `--seed 42 100 7` pour plusieurs GIFs d'un coup
+- Nommage : `replays/phase4_v{N}_seed{S}.gif` — inclut la version du checkpoint pour comparer entre runs
+- Meme seed + agents differents = comparaison visuelle directe de l'evolution
+
+**Premier test** : phase4_v4_seed42.gif — 165 frames, reward 2.1, collect_wood + collect_sapling + wake_up
+
+---
+
 ## Prochaines etapes (a venir)
 
 - [ ] Collecter 600 episodes random + 200 episodes agent

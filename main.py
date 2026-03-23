@@ -40,6 +40,70 @@ from pipeline.train import train_phase1, train_phase2, train_phase3, train_phase
 
 
 CHECKPOINT_DIR = "checkpoints"
+REPLAY_DIR = "replays"
+
+
+@torch.no_grad()
+def play_and_save_gif(workspace, rssm, actor, device, seed, version_tag):
+    """Joue un episode et sauvegarde le gameplay en GIF."""
+    import crafter
+    from PIL import Image
+    from data.collector import extract_state
+
+    os.makedirs(REPLAY_DIR, exist_ok=True)
+
+    workspace.eval()
+    rssm.eval()
+
+    env = crafter.Env(seed=seed)
+    obs = env.reset()
+
+    h, z = rssm.initial_state(1, device)
+    prev_action = torch.zeros(1, dtype=torch.long, device=device)
+
+    frames = [obs.copy()]
+    done = False
+    ep_reward = 0.0
+    info = None
+
+    while not done:
+        obs_t = torch.from_numpy(obs).permute(2, 0, 1).float().unsqueeze(0).to(device) / 255.0
+
+        if info is None:
+            state_t = torch.zeros(1, 16, device=device)
+            state_t[0, :4] = 1.0
+        else:
+            state_t = torch.from_numpy(extract_state(info)).unsqueeze(0).to(device)
+
+        w_t = workspace.encode_to_fused({"vision": obs_t, "state": state_t})
+        out = rssm.observe_step(h, z, prev_action, w_t)
+        h, z = out["h"], out["z"]
+
+        action = actor.get_action(h, z, sample=False)
+        obs, reward, done, info = env.step(action.item())
+        prev_action = action
+
+        frames.append(obs.copy())
+        ep_reward += reward
+
+    # Upscale frames (64x64 -> 256x256) and save GIF
+    pil_frames = []
+    for frame in frames:
+        img = Image.fromarray(frame).resize((256, 256), Image.NEAREST)
+        pil_frames.append(img)
+
+    filename = f"{version_tag}_seed{seed}.gif"
+    path = os.path.join(REPLAY_DIR, filename)
+    pil_frames[0].save(
+        path, save_all=True, append_images=pil_frames[1:],
+        duration=100, loop=0,
+    )
+
+    achievements = info.get("achievements", {})
+    achieved = [k for k, v in achievements.items() if v > 0]
+
+    print(f"  {filename} — {len(frames)} frames, reward: {ep_reward:.1f}, achievements: {achieved}")
+    return path
 
 
 def load_config(path: str) -> dict:
@@ -247,6 +311,10 @@ def main():
                         help="Collecter N episodes avec l'agent entraine")
     parser.add_argument("--show-data", action="store_true",
                         help="Affiche le manifest des donnees collectees")
+    parser.add_argument("--play", action="store_true",
+                        help="Joue un episode et sauvegarde un GIF")
+    parser.add_argument("--seed", type=int, nargs="*", default=None,
+                        help="Seed(s) pour --play (ex: --seed 42 100)")
     args = parser.parse_args()
 
     if args.list_checkpoints:
@@ -278,6 +346,38 @@ def main():
     torch.manual_seed(config["seed"])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
+
+    # --- Play mode ---
+    if args.play:
+        workspace = build_workspace(config).to(device)
+        rssm = build_rssm(config).to(device)
+        actor, _ = build_actor_critic(config, rssm)
+        actor = actor.to(device)
+
+        _load_gw(workspace, device, version=args.load_version)
+        try:
+            ckpt = load_checkpoint("phase3_rssm", device, version=args.load_version)
+            rssm.load_state_dict(ckpt["rssm_state_dict"])
+        except FileNotFoundError:
+            print("ERREUR: Pas de checkpoint RSSM.")
+            return
+        try:
+            ckpt = load_checkpoint("phase4_agent", device, version=args.load_version)
+            actor.load_state_dict(ckpt["actor_state_dict"])
+        except FileNotFoundError:
+            print("ERREUR: Pas de checkpoint agent.")
+            return
+
+        # Determine version tag from checkpoint metadata
+        meta = ckpt.get("_meta", {})
+        version_tag = f"phase4_v{meta.get('version', '?')}"
+
+        seeds = args.seed if args.seed else [42]
+        print(f"\nPlaying {len(seeds)} episode(s)...")
+        for s in seeds:
+            play_and_save_gif(workspace, rssm, actor, device, s, version_tag)
+        print(f"\nGIFs saved in {REPLAY_DIR}/")
+        return
 
     # --- Collection-only modes ---
     tc = config["training"]
