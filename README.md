@@ -2,7 +2,12 @@
 
 Global Workspace + Dreamer-style World Model on Crafter (Minecraft 2D).
 
-Inspired by [Multimodal Dreaming](https://arxiv.org/pdf/2502.21142) (ruflab, ANITI).
+This project is based on the **Global Latent Workspace (GLoW)**, a cognitive-inspired architecture developed in an ERC-funded research project led by [Rufin VanRullen](https://rufinv.github.io/) at the **NeuroAI team** of [CerCo](https://cerco.cnrs.fr/en/neuroai-2/) (CNRS).
+
+This implementation is inspired by the paper [Multimodal Dreaming](https://arxiv.org/abs/2502.21142), which combines GLoW with Dreamer on RoboDesk.  
+Here, we adapt and explore this approach on the [Crafter](https://github.com/danijar/crafter) environment.
+
+See [DEVLOG.md](DEVLOG.md) for a detailed journal of all design decisions, problems encountered, and results across training runs.
 
 ## Architecture
 
