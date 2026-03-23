@@ -197,6 +197,11 @@ def worldmodel_epoch(
 
 # ==================== PHASE 4 : Actor-Critic ====================
 
+def symlog(x: torch.Tensor) -> torch.Tensor:
+    """Symlog transform — amplifies small rewards, compresses large ones."""
+    return torch.sign(x) * torch.log1p(torch.abs(x))
+
+
 def actor_critic_epoch(
     workspace: GlobalWorkspace,
     rssm: RSSM,
@@ -206,19 +211,30 @@ def actor_critic_epoch(
     actor_optimizer: torch.optim.Optimizer,
     critic_optimizer: torch.optim.Optimizer,
     device: torch.device,
-    horizon: int = 15,
+    horizon: int = 8,
     gamma: float = 0.997,
     lambda_: float = 0.95,
-    entropy_weight: float = 3e-4,
+    log_alpha: torch.Tensor = None,
+    alpha_optimizer: torch.optim.Optimizer = None,
+    target_entropy: float = 1.4,
+    actor_grad_clip: float = 100.0,
+    critic_grad_clip: float = 100.0,
     max_batches: Optional[int] = None,
 ) -> Dict[str, float]:
-    """Phase 4 : Entraine actor et critic sur des trajectoires imaginees."""
+    """Phase 4 : Entraine actor et critic sur des trajectoires imaginees.
+
+    Uses auto-tuned entropy (Dreamer v3 style), symlog reward scaling,
+    and gradient clipping.
+    """
     workspace.eval()
     rssm.eval()
     actor.train()
     critic.train()
 
-    metrics = {"actor_loss": 0.0, "critic_loss": 0.0, "entropy": 0.0, "mean_reward": 0.0}
+    metrics = {
+        "actor_loss": 0.0, "critic_loss": 0.0, "entropy": 0.0,
+        "mean_reward": 0.0, "alpha": 0.0,
+    }
     n_batches = 0
 
     for batch in dataloader:
@@ -247,11 +263,14 @@ def actor_critic_epoch(
 
         imagined = imagine_trajectories(rssm, actor, init_h, init_z, horizon)
 
+        # Symlog reward scaling
+        scaled_rewards = symlog(imagined["reward"])
+
         with torch.no_grad():
             values_target = critic(imagined["h"], imagined["z"])
 
         returns = compute_lambda_returns(
-            imagined["reward"], values_target, imagined["continue"],
+            scaled_rewards, values_target, imagined["continue"],
             gamma=gamma, lambda_=lambda_,
         )
 
@@ -260,23 +279,34 @@ def actor_critic_epoch(
         values = critic(imagined["h"].detach(), imagined["z"].detach())
         critic_loss = F.mse_loss(values, returns.detach())
         critic_loss.backward()
-        nn.utils.clip_grad_norm_(critic.parameters(), max_norm=1.0)
+        nn.utils.clip_grad_norm_(critic.parameters(), max_norm=critic_grad_clip)
         critic_optimizer.step()
+
+        # Current entropy coefficient
+        alpha = log_alpha.exp().item() if log_alpha is not None else 1e-2
 
         # Actor
         actor_optimizer.zero_grad()
         dists = actor(imagined["h"].detach(), imagined["z"].detach())
         log_probs = dists.log_prob(imagined["action"].detach())
         entropy = dists.entropy().mean()
-        actor_loss = -(log_probs * returns.detach()).mean() - entropy_weight * entropy
+        actor_loss = -(log_probs * returns.detach()).mean() - alpha * entropy
         actor_loss.backward()
-        nn.utils.clip_grad_norm_(actor.parameters(), max_norm=1.0)
+        nn.utils.clip_grad_norm_(actor.parameters(), max_norm=actor_grad_clip)
         actor_optimizer.step()
+
+        # Auto-tune entropy coefficient
+        if log_alpha is not None and alpha_optimizer is not None:
+            alpha_optimizer.zero_grad()
+            alpha_loss = log_alpha.exp() * (entropy.detach() - target_entropy)
+            alpha_loss.backward()
+            alpha_optimizer.step()
 
         metrics["actor_loss"] += actor_loss.item()
         metrics["critic_loss"] += critic_loss.item()
         metrics["entropy"] += entropy.item()
         metrics["mean_reward"] += imagined["reward"].mean().item()
+        metrics["alpha"] += (log_alpha.exp().item() if log_alpha is not None else alpha)
         n_batches += 1
 
     return {k: v / max(n_batches, 1) for k, v in metrics.items()}
@@ -400,7 +430,10 @@ def train_phase3(workspace, rssm, seq_loader, config, device):
 
 
 def train_phase4(workspace, rssm, actor, critic, seq_loader, config, device):
-    """Phase 4 : Actor-Critic (imagination)."""
+    """Phase 4 : Actor-Critic (imagination).
+
+    Features: auto-tuned entropy, symlog rewards, gradient clipping, early stopping.
+    """
     tc = config["training"]
     ac_cfg = config.get("actor_critic", {})
 
@@ -415,8 +448,20 @@ def train_phase4(workspace, rssm, actor, critic, seq_loader, config, device):
         critic.parameters(), lr=ac_cfg.get("critic_lr", 3e-5)
     )
 
+    # Auto-tune entropy (Dreamer v3 style)
+    target_entropy = ac_cfg.get("target_entropy", 1.4)
+    log_alpha = torch.tensor(0.0, device=device, requires_grad=True)
+    alpha_optimizer = torch.optim.Adam([log_alpha], lr=ac_cfg.get("entropy_lr", 1e-3))
+    print(f"  Auto-tune entropy: target={target_entropy:.2f}")
+
     max_batches = tc.get("ac_max_batches", None)
     n_epochs = tc.get("ac_epochs", 200)
+
+    # Early stopping: track best
+    best_reward = -float("inf")
+    best_actor_state = None
+    best_critic_state = None
+    best_epoch = 0
 
     for epoch in range(n_epochs):
         metrics = actor_critic_epoch(
@@ -428,10 +473,14 @@ def train_phase4(workspace, rssm, actor, critic, seq_loader, config, device):
             actor_optimizer=actor_optimizer,
             critic_optimizer=critic_optimizer,
             device=device,
-            horizon=ac_cfg.get("imagination_horizon", 15),
+            horizon=ac_cfg.get("imagination_horizon", 8),
             gamma=ac_cfg.get("gamma", 0.997),
             lambda_=ac_cfg.get("lambda_", 0.95),
-            entropy_weight=ac_cfg.get("entropy_weight", 3e-4),
+            log_alpha=log_alpha,
+            alpha_optimizer=alpha_optimizer,
+            target_entropy=target_entropy,
+            actor_grad_clip=ac_cfg.get("actor_grad_clip", 100.0),
+            critic_grad_clip=ac_cfg.get("critic_grad_clip", 100.0),
             max_batches=max_batches,
         )
         print(
@@ -439,7 +488,24 @@ def train_phase4(workspace, rssm, actor, critic, seq_loader, config, device):
             f"actor: {metrics['actor_loss']:.4f}  "
             f"critic: {metrics['critic_loss']:.4f}  "
             f"entropy: {metrics['entropy']:.4f}  "
+            f"alpha: {metrics['alpha']:.4f}  "
             f"imag_reward: {metrics['mean_reward']:.4f}"
         )
 
+        # Track best model (by imag_reward, only if entropy is healthy)
+        if metrics["mean_reward"] > best_reward and metrics["entropy"] > 0.5:
+            best_reward = metrics["mean_reward"]
+            best_actor_state = {k: v.clone() for k, v in actor.state_dict().items()}
+            best_critic_state = {k: v.clone() for k, v in critic.state_dict().items()}
+            best_epoch = epoch + 1
+
+    if best_actor_state is not None:
+        print(f"  Restoring best model from epoch {best_epoch} (imag_reward={best_reward:.4f})")
+        actor.load_state_dict(best_actor_state)
+        critic.load_state_dict(best_critic_state)
+    else:
+        print("  WARNING: No healthy checkpoint found (entropy always < 0.5)")
+
+    metrics["best_epoch"] = best_epoch
+    metrics["best_imag_reward"] = best_reward
     return metrics

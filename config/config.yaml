@@ -47,12 +47,16 @@ rssm:
 # --- Actor-Critic ---
 actor_critic:
   hidden_dim: 256
-  imagination_horizon: 15
+  imagination_horizon: 8
   gamma: 0.997
   lambda_: 0.95
-  actor_lr: 3.0e-5
-  critic_lr: 3.0e-5
-  entropy_weight: 3.0e-3
+  actor_lr: 1.0e-5
+  critic_lr: 1.0e-5
+  entropy_weight: 1.0e-2
+  target_entropy: 1.4
+  entropy_lr: 1.0e-3
+  actor_grad_clip: 100.0
+  critic_grad_clip: 100.0
 
 # --- Losses ---
 losses:
