@@ -219,7 +219,8 @@ def actor_critic_epoch(
     log_alpha: torch.Tensor = None,
     alpha_optimizer: torch.optim.Optimizer = None,
     target_entropy: float = 1.0,
-    alpha_min: float = 0.01,
+    alpha_min: float = 0.005,
+    reward_scale: float = 2.0,
     actor_grad_clip: float = 100.0,
     critic_grad_clip: float = 100.0,
     max_batches: Optional[int] = None,
@@ -288,12 +289,12 @@ def actor_critic_epoch(
         # Current entropy coefficient
         alpha = log_alpha.exp().item() if log_alpha is not None else 1e-2
 
-        # Actor
+        # Actor (returns scaled to compete with entropy bonus)
         actor_optimizer.zero_grad()
         dists = actor(imagined["h"].detach(), imagined["z"].detach())
         log_probs = dists.log_prob(imagined["action"].detach())
         entropy = dists.entropy().mean()
-        actor_loss = -(log_probs * returns.detach()).mean() - alpha * entropy
+        actor_loss = -(log_probs * (returns.detach() * reward_scale)).mean() - alpha * entropy
         actor_loss.backward()
         nn.utils.clip_grad_norm_(actor.parameters(), max_norm=actor_grad_clip)
         actor_optimizer.step()
@@ -485,7 +486,8 @@ def train_phase4(workspace, rssm, actor, critic, seq_loader, config, device):
             log_alpha=log_alpha,
             alpha_optimizer=alpha_optimizer,
             target_entropy=target_entropy,
-            alpha_min=ac_cfg.get("alpha_min", 0.01),
+            alpha_min=ac_cfg.get("alpha_min", 0.005),
+            reward_scale=ac_cfg.get("reward_scale", 2.0),
             actor_grad_clip=ac_cfg.get("actor_grad_clip", 100.0),
             critic_grad_clip=ac_cfg.get("critic_grad_clip", 100.0),
             max_batches=max_batches,

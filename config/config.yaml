@@ -47,7 +47,7 @@ rssm:
 # --- Actor-Critic ---
 actor_critic:
   hidden_dim: 256
-  imagination_horizon: 8
+  imagination_horizon: 6
   gamma: 0.997
   lambda_: 0.95
   actor_lr: 1.0e-5
@@ -55,7 +55,8 @@ actor_critic:
   entropy_weight: 1.0e-2
   target_entropy: 1.0
   entropy_lr: 1.0e-3
-  alpha_min: 0.01
+  alpha_min: 0.005
+  reward_scale: 2.0
   actor_grad_clip: 100.0
   critic_grad_clip: 100.0
 
@@ -75,7 +76,7 @@ losses:
     kl_balance: 0.8
     free_nats: 1.0
     workspace_recon_weight: 1.0
-    reward_weight: 1.0
+    reward_weight: 3.0
     continue_weight: 1.0
 
 # --- Training ---
