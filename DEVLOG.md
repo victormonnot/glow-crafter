@@ -229,9 +229,107 @@ Ce fichier trace toutes les etapes majeures du projet, les problemes rencontres,
 
 ---
 
-## Prochaines etapes (a venir)
+## Run 6 — Phase 4 retrain avec target_entropy=1.0 + alpha_min=0.01
 
-- [ ] Retrain Phase 4 avec les nouveaux hyperparams (target_entropy=1.0, alpha_min=0.01)
-- [ ] Si mieux : replay GIF seed 42 pour comparer visuellement avec v4
-- [ ] Si le GW semble etre le bottleneck : ameliorer Phase 2 (temperature, reconstruction loss, projections)
-- [ ] Prochaine boucle collect -> train avec le meilleur agent
+**Contexte** : Meme GW/RSSM que run 5 (1000 eps), seulement Phase 4 retrainee avec les fix entropy.
+**Resultats** :
+- **Mean reward : 0.65** — encore pire que run 5 (0.75)
+- 4 achievements, best epoch 55
+- Alpha a bien tenu a 0.01 (le clamp fonctionne)
+- MAIS entropy est restee a ~2.0 pendant 90 epochs — l'agent est reste quasi-random
+
+**Analyse** : Le diagnostic initial (world model dilue) etait faux. Le pic imag_reward a 0.022 (epoch 55) prouve que le world model SAT differencier les bonnes actions. Le vrai probleme : **le gradient reward est trop faible par rapport au bonus entropy**. Meme a alpha=0.01, le bonus entropy (0.01 * 2.0 = 0.02) domine l'imag_reward (~0.012). L'actor n'a pas assez de signal pour exploiter les bonnes trajectoires.
+
+**Checkpoint** : `phase4_agent_v6.pt`
+
+---
+
+## Changement — Reward scaling + alpha_min plus bas
+
+**Probleme** : Le signal reward est noye par le bonus entropy. L'actor voit des bonnes trajectoires mais ne les "lock" pas.
+**Solutions** :
+
+1. **reward_scale = 2.0** : Multiplie les returns par 2 avant le gradient actor. Le signal reward devient competitif face au bonus entropy (0.024 vs 0.02 au lieu de 0.012 vs 0.02). On commence conservateur a 2.0, on augmentera si besoin.
+
+2. **alpha_min 0.01 -> 0.005** : Laisse alpha descendre plus bas. Reduit le bonus entropy minimum. Combined avec le reward scale, ca devrait permettre a l'actor d'exploiter.
+
+**Fichiers modifies** : config.yaml (alpha_min, reward_scale), pipeline/train.py (reward_scale param, scaling des returns dans actor loss)
+
+**Espoir** : L'entropy descend progressivement vers 1.0-1.5 (pas collapse, pas trop haute), l'actor apprend a exploiter les bonnes trajectoires.
+
+---
+
+## Run 7 — Phase 4 avec reward_scale=2.0 + alpha_min=0.005
+
+**Contexte** : Meme GW/RSSM (1000 eps). Actor retrain avec reward_scale et alpha_min plus bas.
+**Resultats** :
+- **Mean reward : -0.10** — pire que random
+- 3 achievements, best epoch 52 (imag_reward=0.0227)
+- Entropy a bien baisse progressivement (2.8 -> 1.7 -> 0.9), pas de collapse brutal
+- MAIS : l'actor a appris a "tricher" dans l'imagination. imag_reward haut (0.0227) mais reward reel nul (-0.10)
+- Le world model imagine des trajectoires qui ne correspondent pas a la realite
+
+**Analyse** : Le probleme n'est pas le controle de l'entropy. C'est que le RSSM (entraine sur 1000 episodes) predit des futurs trop lisses — les rewards imagines ne correspondent pas aux rewards reels. L'actor optimise une "fausse" reward. Horizon 8 aggrave le probleme (plus de steps = plus de drift). Les 3 tentatives sur 1000 episodes ont toutes echoue (0.75, 0.65, -0.10) alors que le run 4 (200 eps) donnait 1.50.
+
+**Checkpoint** : `phase4_agent_v7.pt`
+
+---
+
+## Changement — Fix RSSM reward prediction + horizon plus court
+
+**Probleme** : Le RSSM imagine des rewards qui ne correspondent pas a la realite. L'actor "triche" en exploitant les erreurs du world model.
+**Solutions** :
+
+1. **reward_weight 1.0 -> 3.0** (Phase 3) : Force le RSSM a mettre 3x plus d'importance sur la prediction de reward. Le world model differentiera mieux les etats avec/sans reward → trajectoires imaginees plus realistes.
+
+2. **imagination_horizon 8 -> 6** (Phase 4) : Moins de steps imagines = predictions restent plus proches de la realite = moins de "triche" possible.
+
+**Fichiers modifies** : config.yaml (reward_weight, imagination_horizon)
+**Impact** : Retrain Phase 3 (RSSM) puis Phase 4 (actor-critic). Le GW (Phase 2) est inchange.
+
+**Espoir** : imag_reward qui correle mieux avec le reward reel. L'actor apprend des vrais bons comportements, pas des exploits.
+
+---
+
+## Run 8 — Phase 3+4 avec reward_weight=3.0 + horizon=6
+
+**Contexte** : RSSM retrain avec reward_weight x3, actor avec horizon 6.
+**Resultats Phase 3** : reward loss 0.0025 (plus bas qu'avant a 0.0032). Convergence propre.
+**Resultats Phase 4** :
+- **Mean reward : 0.40** — toujours sous le random
+- 4 achievements dont **defeat_zombie 5/20** (nouveau ! jamais vu avant)
+- Best epoch : 6 — confirme que plus l'actor imagine, plus il diverge
+- imag_reward plat (~0.01) pendant tout le training
+
+**Analyse** : Le reward_weight x3 n'a pas suffi. Le probleme fondamental : ~99% des transitions ont reward=0, donc le RSSM apprend a predire ~0 partout (MSE basse mais aucune discrimination). C'est le **class imbalance problem** applique a la prediction de reward.
+
+**Note** : defeat_zombie est interessant — l'agent a appris un comportement qu'on n'avait jamais vu, meme avec le meilleur run (1.50). Le horizon court (6) force peut-etre des strategies a court terme plus concretes.
+
+**Checkpoint** : `phase4_agent_v8.pt`
+
+---
+
+## Etat actuel — Projet mis en pause
+
+**Meilleur resultat** : Run 4 (200 episodes, phase4_v4) — mean_reward=1.50, 7 achievements
+**Runs sur 1000 episodes** : 0.75, 0.65, -0.10, 0.40 — tous en regression
+
+**Ce qui marche :**
+- GW (vision + state) fonctionne, translation MSE tres bonne (0.003)
+- RSSM converge bien (ws_recon, KL stables)
+- Auto-tune entropy fonctionne (pas de collapse brutal)
+- Pipeline complet fonctionnel (collect → train → eval → replay GIF)
+
+**Ce qui ne marche pas encore :**
+- Scaling a 1000 episodes degrade les performances de l'actor
+- L'imag_reward ne correle pas bien avec le reward reel (actor "triche")
+- Le RSSM predit reward ≈ 0 partout (class imbalance : 99% des transitions ont reward=0)
+
+**Pistes pour quand on reprendra :**
+- [ ] **Reward balancing dans le RSSM** : Ponderer les transitions avec reward != 0 beaucoup plus fort dans la loss (ex: x10-x50). Ou utiliser une loss focale / weighted BCE au lieu de MSE pour la reward prediction. C'est le fix le plus important — sans ca le RSSM ne differentie pas les bons etats.
+- [ ] **Retour aux 200 episodes** comme baseline stable (run 4 = 1.50)
+- [ ] **Ameliorer Phase 2** : temperature contrastive (0.07 → 0.5), reconstruction loss pendant alignement, projections plus profondes
+- [ ] **Reward prediction categorielle** (comme Dreamer v3) : predire des bins de reward au lieu d'une valeur continue — resout le class imbalance naturellement
+- [ ] **Boucle collect-train** : ne marche que si le RSSM est fiable. Fixer le RSSM d'abord.
+
+**Priorite** : Passer a cocoBrain (priorite #1 pour le stage) et vmasHivemind.
